@@ -1,0 +1,7 @@
+
+lightgbm
+scikit-learn
+pandas
+joblib
+streamlit
+requests
