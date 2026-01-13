@@ -6,9 +6,6 @@ import importlib
 import requests
 from pathlib import Path
 
-# joblib may not be installed in the running Python environment (ModuleNotFoundError).
-# Attempt import and if missing show an installer in the Streamlit UI so the user
-# can install it into the same Python interpreter the app is running under.
 try:
     import joblib
 except ModuleNotFoundError:
@@ -95,7 +92,6 @@ except Exception as e:
     st.error(f"Failed to load info CSV at {INFO_PATH}: {e}")
     info = pd.DataFrame()
 
-# Determine expected feature names from the loaded model (best-effort)
 expected_features = None
 try:
     if hasattr(model, "feature_name_"):
@@ -159,11 +155,9 @@ else:
     user_input = {}
 
 if st.button("Predict"):
-    # Build input DataFrame matching model's expected features (if known)
     if expected_features is not None:
         X = pd.DataFrame(0, index=[0], columns=expected_features)
         matched = set()
-        # If we populated `selected_features` from the UI, set those directly
         try:
             sel = selected_features
         except NameError:
@@ -188,7 +182,6 @@ if st.button("Predict"):
         st.error(f"Prediction failed: {e}")
         st.stop()
 
-    # Top-3 predictions
     ranked = sorted(zip(labels, proba), key=lambda x: x[1], reverse=True)[:3]
 
     st.subheader("Top Predictions")
@@ -204,8 +197,6 @@ if st.button("Predict"):
             st.write("Prevention:", prevention)
         st.markdown("---")
 
-# --- Option B: Call FastAPI backend instead ---
-# Uncomment if you want to use FastAPI running at localhost:8000
 
 if st.button("Predict via API"):
     payload = {"features": user_input}
@@ -213,12 +204,10 @@ if st.button("Predict via API"):
     st.json(response.json())
 
 
-# --- Reference: Nearby clinics/hospitals (Google Places via API key or Overpass fallback) ---
 st.markdown("---")
 st.header("Nearby Clinics & Hospitals")
 st.write("Find nearby clinics and hospitals. Provide a Google Maps API key and I will estimate your location and search for nearby places.")
 
-# Google API key input (stored in session only)
 api_key = st.text_input("Google Maps API Key", type="password")
 radius_km = st.slider("Search radius (km)", min_value=1, max_value=50, value=5)
 
